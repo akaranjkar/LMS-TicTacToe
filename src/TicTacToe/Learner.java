@@ -46,7 +46,7 @@ public class Learner {
     // No teacher mode
     public void noTeacherMode() {
         List<List<char[]>> noTeacherTrainingGames = new ArrayList<>();
-        int numberOfGames = 20;
+        int numberOfGames = 100;
         for (int i = 0; i < numberOfGames; i++) {
             List<char[]> game = new ArrayList<>();
             int moves = 0;
@@ -284,6 +284,7 @@ public class Learner {
 	public static void main(String[] args) throws IOException {
         Learner l = new Learner();
         l.initializeWeights();
-        l.noTeacherMode();
+        //l.noTeacherMode();
+        l.teacherMode();
     }
 }

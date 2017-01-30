@@ -1,18 +1,21 @@
 package TicTacToe;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Game {
-	Board board;
-	Player player1, player2;
+//    List<List<char[]>> gamesPlayed = new ArrayList<>();
+	ComputerPlayer player1;
+	Player player2;
 	
 	public Game() {
-		board = new Board();
 		player1 = new ComputerPlayer('X');
 		player2 = new Player('O');
 	}
 
-	private void selectMode() {
+	private void selectMode() throws IOException {
 	    boolean validSelection = false;
 	    Scanner in = new Scanner(System.in);
 	    System.out.println("Select mode to test:");
@@ -20,11 +23,10 @@ public class Game {
         System.out.println("2. No teacher mode.");
         while (!validSelection) {
             int choice = in.nextInt();
-            if (choice == 1) {
+            if (choice == 1 || choice == 2) {
                 validSelection = true;
-                // Train in teacher mode and start
-            } else if (choice == 2) {
-                // Train in no teacher mode and start
+                // Train and start
+                player1.initialize(choice);
             } else {
                 System.out.println("Invalid choice. Try again.");
             }
@@ -35,15 +37,17 @@ public class Game {
 		return (int) (Math.random() * 2 + 1);
 	}
 
-	public void displayBoard() {
-		board.displayBoard();
+	public void displayBoard(char[] boardState) {
+        System.out.println(boardState[0] + " " + boardState[1] + " " + boardState[2]);
+        System.out.println(boardState[3] + " " + boardState[4] + " " + boardState[5]);
+        System.out.println(boardState[6] + " " + boardState[7] + " " + boardState[8]);
 	}
 
 	// Function to make a move
-	public boolean makeMove(Player player, int position) {
-		int valueAtPosition = Character.getNumericValue(board.getBoardState()[position]);
+	public boolean makeMove(char[] boardState, Player player, int position) {
+		int valueAtPosition = Character.getNumericValue(boardState[position]);
 		if ((valueAtPosition >= 0) && (valueAtPosition <= 8)) {
-			board.updateBoardState(position, player.getSymbol());
+			boardState[position] = player.getSymbol();
 			return true;
 		} else {
 			return false;
@@ -51,9 +55,8 @@ public class Game {
 	}
 	
 	// Function to check if a player won the game
-	public boolean checkVictory(Player player) {
+	public boolean checkVictory(char[] boardState, Player player) {
 		char playerSymbol = player.getSymbol();
-		char[] boardState = board.getBoardState();
 		boolean flag = false;
 		// Check columns
 		for (int i = 0; i < 3; i++) {
@@ -83,36 +86,57 @@ public class Game {
 		int moves = 0;
 		int turn = initialTurn();
 		int position;
+		int humanWins = 0;
+		int computerWins = 0;
+		int draws = 0;
 		boolean gameOver = false;
+		boolean playAgain = true;
 		Scanner in = new Scanner(System.in);
-		Player currentPlayer;
-		while (moves < 9 && !gameOver) {
-			currentPlayer = (turn == 1) ? player1 : player2;
-			board.displayBoard();
-			System.out.println(currentPlayer.getSymbol() + "'s turn: ");
-			position = in.nextInt();
-			if (position >= 0 || position <=8) {
-				if (makeMove(currentPlayer, position)) {
-					moves++;
-					turn = (turn == 1) ? 2 : 1;
-					if (checkVictory(currentPlayer)) {
-						gameOver = true;
-						board.displayBoard();
-						System.out.println(currentPlayer.getSymbol() + " wins.");
-					}
-				} else {
-					System.out.println("Invalid move. That position already has a symbol. Try again.");
-					continue;
-				}
-			} else {
-				System.out.println("Invalid position. Position must be between 0 and 8. Try again.");
-			}
-		}
-		if (!gameOver) {
-			board.displayBoard();
-			System.out.println("The game was a draw.");
-			gameOver = true;
-		}
+		while(playAgain) {
+		    char[] boardState = "012345678".toCharArray();
+            while (moves < 9 && !gameOver) {
+                if (turn == 1) {
+                    // Computer plays
+                    position = player1.selectBestMove(boardState);
+                    makeMove(boardState,player1, position);
+                    System.out.println(player1.getSymbol() + " played position " + position + ".");
+                } else {
+                    //Human plays
+                    displayBoard(boardState);
+                    System.out.println(player2.getSymbol() + "'s turn: ");
+                    position = in.nextInt();
+                    if (position >= 0 || position <= 8) {
+                        if (makeMove(boardState, player2, position)) {
+                            moves++;
+                            turn = (turn == 1) ? 2 : 1;
+                            if (checkVictory(boardState, player2)) {
+                                gameOver = true;
+                                humanWins++;
+                                displayBoard(boardState);
+                                System.out.println(player2.getSymbol() + " wins.");
+                            }
+                        } else {
+                            System.out.println("Invalid move. That position already has a symbol. Try again.");
+                            continue;
+                        }
+                    } else {
+                        System.out.println("Invalid position. Position must be between 0 and 8. Try again.");
+                    }
+                    turn = (turn == 1) ? 2 : 1;
+                }
+            }
+            if (!gameOver) {
+                displayBoard(boardState);
+                System.out.println("The game was a draw.");
+                gameOver = true;
+            }
+            // Check for another game
+            System.out.println("Do you want to play another game? (Y/N): ");
+            String gameChoice = in.nextLine();
+            if (!(gameChoice.equalsIgnoreCase("yes") || gameChoice.equalsIgnoreCase("y"))) {
+                playAgain = false;
+            }
+        }
 	}
 	
 	public static void main(String[] args){

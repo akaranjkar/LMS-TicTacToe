@@ -7,14 +7,13 @@ public class Experience {
     double[] weights = new double[7];
 
     // Select type of experience
-    private double[] train(int mode) throws IOException {
+    public double[] train(int mode) throws IOException {
             if (mode == 1) {
                 learner.teacherMode();
-                return learner.getWeights();
             } else if (mode == 2) {
                 learner.noTeacherMode();
-                return learner.getWeights();
             }
+        return learner.getWeights();
         }
 
 }
