@@ -3,8 +3,8 @@ package TicTacToe;
 import java.io.IOException;
 
 public class ComputerPlayer extends Player {
-    Experience experience = new Experience();
-    double[] weights;
+    private Experience experience = new Experience();
+    private double[] weights;
 
     public ComputerPlayer(char symbol) {
         super(symbol);

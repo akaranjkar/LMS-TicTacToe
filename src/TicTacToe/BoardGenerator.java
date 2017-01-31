@@ -7,7 +7,7 @@ public class BoardGenerator {
 
     // Print a game
     private void printGame(List<char[]> game) {
-        for (char[] boardState: game)
+        for (char[] boardState : game)
             System.out.print(String.valueOf(boardState) + " ");
         System.out.println();
     }
@@ -16,15 +16,15 @@ public class BoardGenerator {
         boolean flag = false;
         // Check columns
         for (int i = 0; i < 3; i++) {
-            flag |= boardState[0+i] == playerSymbol &&
-                    boardState[3+i] == playerSymbol &&
-                    boardState[6+i] == playerSymbol;
+            flag |= boardState[0 + i] == playerSymbol &&
+                    boardState[3 + i] == playerSymbol &&
+                    boardState[6 + i] == playerSymbol;
         }
         // Check rows
-        for (int i=0; i < 7; i = i + 3) {
+        for (int i = 0; i < 7; i = i + 3) {
             flag |= boardState[i] == playerSymbol &&
-                    boardState[i+1] == playerSymbol &&
-                    boardState[i+2] == playerSymbol;
+                    boardState[i + 1] == playerSymbol &&
+                    boardState[i + 2] == playerSymbol;
         }
         // Check diagonals
         flag |= boardState[0] == playerSymbol &&
@@ -45,7 +45,7 @@ public class BoardGenerator {
             if ((valueAtPosition >= 0) && (valueAtPosition <= 8)) {
                 char[] app = boardState.clone();
                 app[i] = playerSymbol;
-                if(!winningBoard(app,playerSymbol)) {
+                if (!winningBoard(app, playerSymbol)) {
                     List<char[]> newGame = new ArrayList<>(game);
                     newGame.add(app);
                     playerSymbol = (playerSymbol == 'X') ? 'O' : 'X';

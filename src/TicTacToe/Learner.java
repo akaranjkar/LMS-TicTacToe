@@ -4,29 +4,29 @@ import java.io.*;
 import java.util.*;
 
 public class Learner {
-	
-	int numberOfFeatures = 6;
-	double learningRate = 0.01;
-	double initialWeightValue = 0.1;
-    double weights[] = new double[numberOfFeatures + 1];
 
-    List<List<char[]>> trainingGames = new ArrayList<>();
-    List<char[]> playerBoardStates = new ArrayList<>();
+    protected int numberOfFeatures = 6;
+    private double learningRate = 0.01;
+    private double initialWeightValue = 0.1;
+    private double weights[] = new double[numberOfFeatures + 1];
+
+    private List<List<char[]>> trainingGames = new ArrayList<>();
+    private List<char[]> playerBoardStates = new ArrayList<>();
 
     public double[] getWeights() {
         return weights;
     }
 
     private void initializeWeights() {
-		for (int i = 0; i < numberOfFeatures + 1; i++)
-			weights[i] = initialWeightValue;
-	}
+        for (int i = 0; i < numberOfFeatures + 1; i++)
+            weights[i] = initialWeightValue;
+    }
 
-	public Learner() {
+    public Learner() {
         initializeWeights();
     }
-	
-	private void readTrainingData() throws IOException {
+
+    private void readTrainingData() throws IOException {
         String teacherModeFile = "data.txt";
         FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/resource/" + teacherModeFile);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fstream));
@@ -36,7 +36,7 @@ public class Learner {
         while ((line = bufferedReader.readLine()) != null) {
             List<char[]> game = new ArrayList<>();
             String[] boardValues = line.trim().split(" ");
-            for (String board: boardValues)
+            for (String board : boardValues)
                 game.add(board.toCharArray());
             trainingGames.add(game);
         }
@@ -68,7 +68,7 @@ public class Learner {
                 } else {
                     // O's turn
                     boardState[randomMove(boardState)] = 'O';
-                    char [] currentState = boardState.clone();
+                    char[] currentState = boardState.clone();
                     game.add(currentState);
                     moves++;
                     if (tripleAttribute(boardState, 'O') >= 1) // O won this game
@@ -98,7 +98,7 @@ public class Learner {
     }
 
     // Learn from a game
-    private void learnFromGame(List<char[]> game){
+    private void learnFromGame(List<char[]> game) {
         playerBoardStates.clear();
         // Check if player won or lost
         int playerResult = tripleAttribute(game.get(game.size() - 1), 'X');
@@ -121,22 +121,22 @@ public class Learner {
         } else if (opponentResult >= 1) {
             lms(playerBoardStates, -100);
         } else {
-            lms(playerBoardStates,0);
+            lms(playerBoardStates, 0);
         }
     }
 
     // Evaluate features for a single board state
-    public int[] evaluateAttributes(char[] boardState, char playerSymbol) {
+    protected int[] evaluateAttributes(char[] boardState, char playerSymbol) {
         char opponentSymbol = playerSymbol == 'X' ? 'O' : 'X';
         int[] attributes = new int[7];
         attributes[0] = 1;
-        attributes[1] = singleAttribute(boardState,playerSymbol);
-        attributes[2] = singleAttribute(boardState,opponentSymbol);
-        attributes[3] = doubleAttribute(boardState,playerSymbol);
-        attributes[4] = doubleAttribute(boardState,opponentSymbol);
-        attributes[5] = tripleAttribute(boardState,playerSymbol);
+        attributes[1] = singleAttribute(boardState, playerSymbol);
+        attributes[2] = singleAttribute(boardState, opponentSymbol);
+        attributes[3] = doubleAttribute(boardState, playerSymbol);
+        attributes[4] = doubleAttribute(boardState, opponentSymbol);
+        attributes[5] = tripleAttribute(boardState, playerSymbol);
 //        attributes[6] = tripleAttribute(boardState,opponentSymbol);
-        attributes[6] = blockAttribute(boardState,playerSymbol);
+        attributes[6] = blockAttribute(boardState, playerSymbol);
 
         return attributes;
     }
@@ -144,7 +144,7 @@ public class Learner {
     private void lms(List<char[]> playerBoardStates, double vfinal) {
         double vhead = 0;
         double vtrain = vfinal;
-        for (int i = playerBoardStates.size() - 1; i >= 0 ; i--) {
+        for (int i = playerBoardStates.size() - 1; i >= 0; i--) {
             char[] boardState = playerBoardStates.get(i);
             int[] attributes = evaluateAttributes(boardState, 'X');
             // Calculate vhead
@@ -158,7 +158,7 @@ public class Learner {
         }
     }
 
-	// Count of player symbol
+    // Count of player symbol
 //	private int singleAttribute(char[] boardState, char playerSymbol) {
 //        int count = 0;
 //        for (char symbol: boardState)
@@ -167,19 +167,25 @@ public class Learner {
 //    }
 
     // One symbol and two open in a line
-    private int singleAttribute(char[] boardState, char playerSymbol){
+    private int singleAttribute(char[] boardState, char playerSymbol) {
         int count = 0;
         // Check columns
         for (int i = 0; i < 3; i++) {
-            if (boardState[0+i] == playerSymbol && openPosition(boardState[3+i]) && openPosition(boardState[6+i])) count++;
-            if (openPosition(boardState[0+i]) && boardState[3+i] == playerSymbol && openPosition(boardState[6+i])) count++;
-            if (openPosition(boardState[0+i]) && openPosition(boardState[3+i]) && boardState[6+i] == playerSymbol) count++;
+            if (boardState[0 + i] == playerSymbol && openPosition(boardState[3 + i]) && openPosition(boardState[6 + i]))
+                count++;
+            if (openPosition(boardState[0 + i]) && boardState[3 + i] == playerSymbol && openPosition(boardState[6 + i]))
+                count++;
+            if (openPosition(boardState[0 + i]) && openPosition(boardState[3 + i]) && boardState[6 + i] == playerSymbol)
+                count++;
         }
         // Check rows
-        for (int i=0; i < 7; i = i + 3) {
-            if (boardState[i] == playerSymbol && openPosition(boardState[i+1]) && openPosition(boardState[i+2])) count++;
-            if (openPosition(boardState[i]) && boardState[i+1] == playerSymbol && openPosition(boardState[i+2])) count++;
-            if (openPosition(boardState[i]) && openPosition(boardState[i+1]) && boardState[i+2] == playerSymbol) count++;
+        for (int i = 0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && openPosition(boardState[i + 1]) && openPosition(boardState[i + 2]))
+                count++;
+            if (openPosition(boardState[i]) && boardState[i + 1] == playerSymbol && openPosition(boardState[i + 2]))
+                count++;
+            if (openPosition(boardState[i]) && openPosition(boardState[i + 1]) && boardState[i + 2] == playerSymbol)
+                count++;
         }
         // Left diagonal
         if (boardState[0] == playerSymbol && openPosition(boardState[4]) && openPosition(boardState[8])) count++;
@@ -194,19 +200,25 @@ public class Learner {
     }
 
     // Two symbols in a line with the third spot open
-    private int doubleAttribute(char[] boardState, char playerSymbol){
+    private int doubleAttribute(char[] boardState, char playerSymbol) {
         int count = 0;
         // Check columns
         for (int i = 0; i < 3; i++) {
-            if (boardState[0+i] == playerSymbol && boardState[3+i] == playerSymbol && openPosition(boardState[6+i])) count++;
-            if (boardState[0+i] == playerSymbol && openPosition(boardState[3+i]) && boardState[6+i] == playerSymbol) count++;
-            if (openPosition(boardState[0+i]) && boardState[3+i] == playerSymbol && boardState[6+i] == playerSymbol) count++;
+            if (boardState[0 + i] == playerSymbol && boardState[3 + i] == playerSymbol && openPosition(boardState[6 + i]))
+                count++;
+            if (boardState[0 + i] == playerSymbol && openPosition(boardState[3 + i]) && boardState[6 + i] == playerSymbol)
+                count++;
+            if (openPosition(boardState[0 + i]) && boardState[3 + i] == playerSymbol && boardState[6 + i] == playerSymbol)
+                count++;
         }
         // Check rows
-        for (int i=0; i < 7; i = i + 3) {
-            if (boardState[i] == playerSymbol && boardState[i+1] == playerSymbol && openPosition(boardState[i+2])) count++;
-            if (boardState[i] == playerSymbol && openPosition(boardState[i+1]) && boardState[i+2] == playerSymbol) count++;
-            if (openPosition(boardState[i]) && boardState[i+1] == playerSymbol && boardState[i+2] == playerSymbol) count++;
+        for (int i = 0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && boardState[i + 1] == playerSymbol && openPosition(boardState[i + 2]))
+                count++;
+            if (boardState[i] == playerSymbol && openPosition(boardState[i + 1]) && boardState[i + 2] == playerSymbol)
+                count++;
+            if (openPosition(boardState[i]) && boardState[i + 1] == playerSymbol && boardState[i + 2] == playerSymbol)
+                count++;
         }
         // Left diagonal
         if (boardState[0] == playerSymbol && boardState[4] == playerSymbol && openPosition(boardState[8])) count++;
@@ -252,11 +264,13 @@ public class Learner {
         int count = 0;
         // Check columns
         for (int i = 0; i < 3; i++) {
-            if (boardState[0+i] == playerSymbol && boardState[3+i] == playerSymbol && boardState[6+i] == playerSymbol) count++;
+            if (boardState[0 + i] == playerSymbol && boardState[3 + i] == playerSymbol && boardState[6 + i] == playerSymbol)
+                count++;
         }
         // Check rows
-        for (int i=0; i < 7; i = i + 3) {
-            if (boardState[i] == playerSymbol && boardState[i+1] == playerSymbol && boardState[i+2] == playerSymbol) count++;
+        for (int i = 0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && boardState[i + 1] == playerSymbol && boardState[i + 2] == playerSymbol)
+                count++;
         }
         // Left diagonal
         if (boardState[0] == playerSymbol && boardState[4] == playerSymbol && boardState[8] == playerSymbol) count++;
@@ -267,29 +281,41 @@ public class Learner {
     }
 
     // Two opponent symbols in a line and player blocks third spot
-    private int blockAttribute(char[] boardState, char playerSymbol){
+    private int blockAttribute(char[] boardState, char playerSymbol) {
         char opponentSymbol = (playerSymbol == 'X') ? 'O' : 'X';
         int count = 0;
         // Check columns
         for (int i = 0; i < 3; i++) {
-            if (boardState[0+i] == playerSymbol && boardState[3+i] == opponentSymbol && boardState[6+i] == opponentSymbol) count++;
-            if (boardState[0+i] == opponentSymbol && boardState[3+i] == playerSymbol && boardState[6+i] == opponentSymbol) count++;
-            if (boardState[0+i] == opponentSymbol && boardState[3+i] == opponentSymbol && boardState[6+i] == playerSymbol) count++;
+            if (boardState[0 + i] == playerSymbol && boardState[3 + i] == opponentSymbol && boardState[6 + i] == opponentSymbol)
+                count++;
+            if (boardState[0 + i] == opponentSymbol && boardState[3 + i] == playerSymbol && boardState[6 + i] == opponentSymbol)
+                count++;
+            if (boardState[0 + i] == opponentSymbol && boardState[3 + i] == opponentSymbol && boardState[6 + i] == playerSymbol)
+                count++;
         }
         // Check rows
-        for (int i=0; i < 7; i = i + 3) {
-            if (boardState[i] == playerSymbol && boardState[i+1] == opponentSymbol && boardState[i+2] == opponentSymbol) count++;
-            if (boardState[i] == opponentSymbol && boardState[i+1] == playerSymbol && boardState[i+2] == opponentSymbol) count++;
-            if (boardState[i] == opponentSymbol && boardState[i+1] == opponentSymbol && boardState[i+2] == playerSymbol) count++;
+        for (int i = 0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && boardState[i + 1] == opponentSymbol && boardState[i + 2] == opponentSymbol)
+                count++;
+            if (boardState[i] == opponentSymbol && boardState[i + 1] == playerSymbol && boardState[i + 2] == opponentSymbol)
+                count++;
+            if (boardState[i] == opponentSymbol && boardState[i + 1] == opponentSymbol && boardState[i + 2] == playerSymbol)
+                count++;
         }
         // Left diagonal
-        if (boardState[0] == playerSymbol && boardState[4] == opponentSymbol && boardState[8] == opponentSymbol) count++;
-        if (boardState[0] == opponentSymbol && boardState[4] == playerSymbol && boardState[8] == opponentSymbol) count++;
-        if (boardState[0] == opponentSymbol && boardState[4] == opponentSymbol && boardState[8] == playerSymbol) count++;
+        if (boardState[0] == playerSymbol && boardState[4] == opponentSymbol && boardState[8] == opponentSymbol)
+            count++;
+        if (boardState[0] == opponentSymbol && boardState[4] == playerSymbol && boardState[8] == opponentSymbol)
+            count++;
+        if (boardState[0] == opponentSymbol && boardState[4] == opponentSymbol && boardState[8] == playerSymbol)
+            count++;
         // Right diagonal
-        if (boardState[2] == playerSymbol && boardState[4] == opponentSymbol && boardState[6] == opponentSymbol) count++;
-        if (boardState[2] == opponentSymbol && boardState[4] == playerSymbol && boardState[6] == opponentSymbol) count++;
-        if (boardState[2] == opponentSymbol && boardState[4] == opponentSymbol && boardState[6] == playerSymbol) count++;
+        if (boardState[2] == playerSymbol && boardState[4] == opponentSymbol && boardState[6] == opponentSymbol)
+            count++;
+        if (boardState[2] == opponentSymbol && boardState[4] == playerSymbol && boardState[6] == opponentSymbol)
+            count++;
+        if (boardState[2] == opponentSymbol && boardState[4] == opponentSymbol && boardState[6] == playerSymbol)
+            count++;
 
         return count;
     }
@@ -312,16 +338,16 @@ public class Learner {
     }
 
     // Check if a position is open
-    public boolean openPosition(char boardPosition) {
+    protected boolean openPosition(char boardPosition) {
         int valueAtPosition = Character.getNumericValue(boardPosition);
         return ((valueAtPosition >= 0) && (valueAtPosition <= 8));
     }
 
     // Print a game
-	private void printGame(List<char[]> game) {
-	    for (char[] boardState: game)
-	        System.out.print(String.valueOf(boardState) + " ");
-	    System.out.println();
+    private void printGame(List<char[]> game) {
+        for (char[] boardState : game)
+            System.out.print(String.valueOf(boardState) + " ");
+        System.out.println();
     }
 
     // Print all training games from a training session
@@ -339,7 +365,7 @@ public class Learner {
         System.out.println();
     }
 
-	public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         Learner l = new Learner();
         l.initializeWeights();
 //        l.teacherMode();
