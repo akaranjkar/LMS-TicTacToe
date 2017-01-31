@@ -5,7 +5,6 @@ import java.io.IOException;
 public class ComputerPlayer extends Player {
     Experience experience = new Experience();
     double[] weights;
-    double leastValue = Double.NEGATIVE_INFINITY;
 
     public ComputerPlayer(char symbol) {
         super(symbol);
@@ -15,9 +14,30 @@ public class ComputerPlayer extends Player {
         weights = experience.train(mode);
     }
 
+    private double vhead(char[] boardState) {
+        double vhead = 0;
+        int[] attributes = experience.learner.evaluateAttributes(boardState, symbol);
+        for (int i = 0; i < experience.learner.numberOfFeatures; i++) {
+            vhead += weights[i] * attributes[i];
+        }
+        return vhead;
+    }
+
     public int selectBestMove(char[] boardState) {
+        int position = -1;
+        double maxScore = Double.NEGATIVE_INFINITY;
         // Check all available moves
-        // Generate boardStates for the moves and calculate board value
-        // Return move with the maximum board value
+        for (int i = 0; i < 9; i++) {
+            if (experience.learner.openPosition(boardState[i])) {
+                char[] tempBoardState = boardState.clone();
+                tempBoardState[i] = symbol;
+                double tempBoardValue = vhead(tempBoardState);
+                if (tempBoardValue >= maxScore) {
+                    maxScore = tempBoardValue;
+                    position = i;
+                }
+            }
+        }
+        return position;
     }
 }

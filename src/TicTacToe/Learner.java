@@ -27,7 +27,7 @@ public class Learner {
     }
 	
 	private void readTrainingData() throws IOException {
-        String teacherModeFile = "TeacherModeGames";
+        String teacherModeFile = "data.txt";
         FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/resource/" + teacherModeFile);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fstream));
         String line;
@@ -46,7 +46,7 @@ public class Learner {
     // No teacher mode
     public void noTeacherMode() {
         List<List<char[]>> noTeacherTrainingGames = new ArrayList<>();
-        int numberOfGames = 100;
+        int numberOfGames = 10000;
         for (int i = 0; i < numberOfGames; i++) {
             List<char[]> game = new ArrayList<>();
             int moves = 0;
@@ -63,7 +63,7 @@ public class Learner {
                     if (tripleAttribute(boardState, 'X') >= 1) // X won this game
                         gameOver = true;
                     else
-                        turn = turn == 1 ? 2 : 1;
+                        turn = (turn == 1) ? 2 : 1;
 
                 } else {
                     // O's turn
@@ -74,7 +74,7 @@ public class Learner {
                     if (tripleAttribute(boardState, 'O') >= 1) // O won this game
                         gameOver = true;
                     else
-                        turn = turn == 1 ? 2 : 1;
+                        turn = (turn == 2) ? 1 : 2;
                 }
             }
             noTeacherTrainingGames.add(game);
@@ -83,6 +83,8 @@ public class Learner {
         for (int i = 0; i < noTeacherTrainingGames.size(); i++) {
             learnFromGame(noTeacherTrainingGames.get(i));
         }
+        System.out.println("Trained on " + noTeacherTrainingGames.size() + " games.");
+        displayWeights();
     }
 
     // Teacher mode
@@ -91,6 +93,8 @@ public class Learner {
         for (int i = 0; i < trainingGames.size(); i++) {
             learnFromGame(trainingGames.get(i));
         }
+        System.out.println("Trained on " + trainingGames.size() + " games.");
+        displayWeights();
     }
 
     // Learn from a game
@@ -122,7 +126,7 @@ public class Learner {
     }
 
     // Evaluate features for a single board state
-    private int[] evaluateAttributes(char[] boardState, char playerSymbol) {
+    public int[] evaluateAttributes(char[] boardState, char playerSymbol) {
         char opponentSymbol = playerSymbol == 'X' ? 'O' : 'X';
         int[] attributes = new int[7];
         attributes[0] = 1;
@@ -131,7 +135,8 @@ public class Learner {
         attributes[3] = doubleAttribute(boardState,playerSymbol);
         attributes[4] = doubleAttribute(boardState,opponentSymbol);
         attributes[5] = tripleAttribute(boardState,playerSymbol);
-        attributes[6] = tripleAttribute(boardState,opponentSymbol);
+//        attributes[6] = tripleAttribute(boardState,opponentSymbol);
+        attributes[6] = blockAttribute(boardState,playerSymbol);
 
         return attributes;
     }
@@ -149,17 +154,42 @@ public class Learner {
             for (int j = 0; j <= numberOfFeatures; j++) {
                 weights[j] += learningRate * (vtrain - vhead) * attributes[j];
             }
-            System.out.print("vtrain: " + vtrain + " vhead: " + vhead + " ");
-            displayWeights();
             vtrain = vhead;
         }
     }
 
 	// Count of player symbol
-	private int singleAttribute(char[] boardState, char playerSymbol) {
+//	private int singleAttribute(char[] boardState, char playerSymbol) {
+//        int count = 0;
+//        for (char symbol: boardState)
+//            count += symbol == playerSymbol? 1 : 0;
+//        return count;
+//    }
+
+    // One symbol and two open in a line
+    private int singleAttribute(char[] boardState, char playerSymbol){
         int count = 0;
-        for (char symbol: boardState)
-            count += symbol == playerSymbol? 1 : 0;
+        // Check columns
+        for (int i = 0; i < 3; i++) {
+            if (boardState[0+i] == playerSymbol && openPosition(boardState[3+i]) && openPosition(boardState[6+i])) count++;
+            if (openPosition(boardState[0+i]) && boardState[3+i] == playerSymbol && openPosition(boardState[6+i])) count++;
+            if (openPosition(boardState[0+i]) && openPosition(boardState[3+i]) && boardState[6+i] == playerSymbol) count++;
+        }
+        // Check rows
+        for (int i=0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && openPosition(boardState[i+1]) && openPosition(boardState[i+2])) count++;
+            if (openPosition(boardState[i]) && boardState[i+1] == playerSymbol && openPosition(boardState[i+2])) count++;
+            if (openPosition(boardState[i]) && openPosition(boardState[i+1]) && boardState[i+2] == playerSymbol) count++;
+        }
+        // Left diagonal
+        if (boardState[0] == playerSymbol && openPosition(boardState[4]) && openPosition(boardState[8])) count++;
+        if (openPosition(boardState[0]) && boardState[4] == playerSymbol && openPosition(boardState[8])) count++;
+        if (openPosition(boardState[0]) && openPosition(boardState[4]) && boardState[8] == playerSymbol) count++;
+        // Right diagonal
+        if (boardState[2] == playerSymbol && openPosition(boardState[4]) && openPosition(boardState[6])) count++;
+        if (openPosition(boardState[2]) && boardState[4] == playerSymbol && openPosition(boardState[6])) count++;
+        if (openPosition(boardState[2]) && openPosition(boardState[4]) && boardState[6] == playerSymbol) count++;
+
         return count;
     }
 
@@ -236,6 +266,34 @@ public class Learner {
         return count;
     }
 
+    // Two opponent symbols in a line and player blocks third spot
+    private int blockAttribute(char[] boardState, char playerSymbol){
+        char opponentSymbol = (playerSymbol == 'X') ? 'O' : 'X';
+        int count = 0;
+        // Check columns
+        for (int i = 0; i < 3; i++) {
+            if (boardState[0+i] == playerSymbol && boardState[3+i] == opponentSymbol && boardState[6+i] == opponentSymbol) count++;
+            if (boardState[0+i] == opponentSymbol && boardState[3+i] == playerSymbol && boardState[6+i] == opponentSymbol) count++;
+            if (boardState[0+i] == opponentSymbol && boardState[3+i] == opponentSymbol && boardState[6+i] == playerSymbol) count++;
+        }
+        // Check rows
+        for (int i=0; i < 7; i = i + 3) {
+            if (boardState[i] == playerSymbol && boardState[i+1] == opponentSymbol && boardState[i+2] == opponentSymbol) count++;
+            if (boardState[i] == opponentSymbol && boardState[i+1] == playerSymbol && boardState[i+2] == opponentSymbol) count++;
+            if (boardState[i] == opponentSymbol && boardState[i+1] == opponentSymbol && boardState[i+2] == playerSymbol) count++;
+        }
+        // Left diagonal
+        if (boardState[0] == playerSymbol && boardState[4] == opponentSymbol && boardState[8] == opponentSymbol) count++;
+        if (boardState[0] == opponentSymbol && boardState[4] == playerSymbol && boardState[8] == opponentSymbol) count++;
+        if (boardState[0] == opponentSymbol && boardState[4] == opponentSymbol && boardState[8] == playerSymbol) count++;
+        // Right diagonal
+        if (boardState[2] == playerSymbol && boardState[4] == opponentSymbol && boardState[6] == opponentSymbol) count++;
+        if (boardState[2] == opponentSymbol && boardState[4] == playerSymbol && boardState[6] == opponentSymbol) count++;
+        if (boardState[2] == opponentSymbol && boardState[4] == opponentSymbol && boardState[6] == playerSymbol) count++;
+
+        return count;
+    }
+
     // Helper functions
     // Choose random player for first move
     private int initialTurn() {
@@ -254,7 +312,7 @@ public class Learner {
     }
 
     // Check if a position is open
-    private boolean openPosition(char boardPosition) {
+    public boolean openPosition(char boardPosition) {
         int valueAtPosition = Character.getNumericValue(boardPosition);
         return ((valueAtPosition >= 0) && (valueAtPosition <= 8));
     }
@@ -284,7 +342,16 @@ public class Learner {
 	public static void main(String[] args) throws IOException {
         Learner l = new Learner();
         l.initializeWeights();
-        //l.noTeacherMode();
-        l.teacherMode();
+//        l.teacherMode();
+//        l.noTeacherMode();
+//        Game game = new Game();
+//        String[] s = "X12345678 X123O5678 X123O567X X12OO567X X12OOX67X X1OOOX67X X1OOOXX7X X1OOOXXOX XXOOOXXOX".split(" ");
+//        List<char[]> g = new ArrayList<>();
+//        for (String b: s)
+//            g.add(b.toCharArray());
+//        for (char[] b: g) {
+//            game.displayBoard(b);
+//            System.out.println(Arrays.toString(l.evaluateAttributes(b,'X')));
+//        }
     }
 }

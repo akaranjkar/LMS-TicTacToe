@@ -38,9 +38,13 @@ public class Game {
 	}
 
 	public void displayBoard(char[] boardState) {
-        System.out.println(boardState[0] + " " + boardState[1] + " " + boardState[2]);
-        System.out.println(boardState[3] + " " + boardState[4] + " " + boardState[5]);
-        System.out.println(boardState[6] + " " + boardState[7] + " " + boardState[8]);
+	    System.out.println();
+        System.out.println(" " + boardState[0] + " | " + boardState[1] + " | " + boardState[2]);
+        System.out.println("-----------");
+        System.out.println(" " + boardState[3] + " | " + boardState[4] + " | " + boardState[5]);
+        System.out.println("-----------");
+        System.out.println(" " + boardState[6] + " | " + boardState[7] + " | " + boardState[8]);
+        System.out.println();
 	}
 
 	// Function to make a move
@@ -98,17 +102,26 @@ public class Game {
                 if (turn == 1) {
                     // Computer plays
                     position = player1.selectBestMove(boardState);
-                    makeMove(boardState,player1, position);
+                    if (position != -1) makeMove(boardState, player1, position); // Need to throw exception if position is -1
+                    moves++;
+                    turn = (turn == 1) ? 2 : 1;
                     System.out.println(player1.getSymbol() + " played position " + position + ".");
+                    if (checkVictory(boardState, player1)) {
+                        gameOver = true;
+                        computerWins++;
+                        displayBoard(boardState);
+                        System.out.println(player1.getSymbol() + " wins.");
+                    }
                 } else {
                     //Human plays
                     displayBoard(boardState);
                     System.out.println(player2.getSymbol() + "'s turn: ");
                     position = in.nextInt();
-                    if (position >= 0 || position <= 8) {
+                    if (position >= 0 && position <= 8) {
                         if (makeMove(boardState, player2, position)) {
                             moves++;
-                            turn = (turn == 1) ? 2 : 1;
+                            displayBoard(boardState);
+                            turn = (turn == 2) ? 1 : 2;
                             if (checkVictory(boardState, player2)) {
                                 gameOver = true;
                                 humanWins++;
@@ -117,12 +130,10 @@ public class Game {
                             }
                         } else {
                             System.out.println("Invalid move. That position already has a symbol. Try again.");
-                            continue;
                         }
                     } else {
                         System.out.println("Invalid position. Position must be between 0 and 8. Try again.");
                     }
-                    turn = (turn == 1) ? 2 : 1;
                 }
             }
             if (!gameOver) {
@@ -138,7 +149,10 @@ public class Game {
             }
         }
 	}
-	
-	public static void main(String[] args){
+
+	public static void main(String[] args) throws IOException {
+		Game game = new Game();
+		game.selectMode();
+		game.playGame();
 	}
 }

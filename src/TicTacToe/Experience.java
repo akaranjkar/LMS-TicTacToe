@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class Experience {
     Learner learner = new Learner();
-    double[] weights = new double[7];
 
     // Select type of experience
     public double[] train(int mode) throws IOException {

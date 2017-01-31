@@ -1,7 +1,7 @@
 package TicTacToe;
 
 public class Player {
-	private char symbol;
+	protected char symbol;
 	
 	public char getSymbol() {
 		return symbol;
