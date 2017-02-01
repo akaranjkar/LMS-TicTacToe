@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Learner {
 
-    protected int numberOfFeatures = 6;
+    protected int numberOfFeatures = 7;
     private double learningRate = 0.01;
     private double initialWeightValue = 0.1;
     private double weights[] = new double[numberOfFeatures + 1];
@@ -17,6 +17,7 @@ public class Learner {
         return weights;
     }
 
+    // Initialize all the weights to 0.1
     private void initializeWeights() {
         for (int i = 0; i < numberOfFeatures + 1; i++)
             weights[i] = initialWeightValue;
@@ -26,8 +27,9 @@ public class Learner {
         initializeWeights();
     }
 
+    // Read training data from the data file for teacher mode
     private void readTrainingData() throws IOException {
-        String teacherModeFile = "data.txt";
+        String teacherModeFile = "data";
         FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/resource/" + teacherModeFile);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fstream));
         String line;
@@ -83,7 +85,6 @@ public class Learner {
         for (int i = 0; i < noTeacherTrainingGames.size(); i++) {
             learnFromGame(noTeacherTrainingGames.get(i));
         }
-        System.out.println("Trained on " + noTeacherTrainingGames.size() + " games.");
         displayWeights();
     }
 
@@ -93,7 +94,6 @@ public class Learner {
         for (int i = 0; i < trainingGames.size(); i++) {
             learnFromGame(trainingGames.get(i));
         }
-        System.out.println("Trained on " + trainingGames.size() + " games.");
         displayWeights();
     }
 
@@ -128,19 +128,27 @@ public class Learner {
     // Evaluate features for a single board state
     protected int[] evaluateAttributes(char[] boardState, char playerSymbol) {
         char opponentSymbol = playerSymbol == 'X' ? 'O' : 'X';
-        int[] attributes = new int[7];
+        int[] attributes = new int[numberOfFeatures + 1];
         attributes[0] = 1;
+        // Feature 1: Number of single X's on the board with two other spots open in a line
         attributes[1] = singleAttribute(boardState, playerSymbol);
+        // Feature 1: Number of single O's on the board with two other spots open in a line
         attributes[2] = singleAttribute(boardState, opponentSymbol);
+        // Feature 1: Number of two X's in a line with the third spot open
         attributes[3] = doubleAttribute(boardState, playerSymbol);
+        // Feature 1: Number of two O's in a line with the third spot open
         attributes[4] = doubleAttribute(boardState, opponentSymbol);
+        // Feature 1: Number of three X's in a line. Victory!
         attributes[5] = tripleAttribute(boardState, playerSymbol);
-//        attributes[6] = tripleAttribute(boardState,opponentSymbol);
+        // Feature 1: Number of two O's in a line and X blocks the third spot (defensive move by X)
         attributes[6] = blockAttribute(boardState, playerSymbol);
+        // Feature 1: Number of two X's in a line and X blocks the third spot (defensive move by O)
+        attributes[7] = blockAttribute(boardState, opponentSymbol);
 
         return attributes;
     }
 
+    // LMS function
     private void lms(List<char[]> playerBoardStates, double vfinal) {
         double vhead = 0;
         double vtrain = vfinal;
@@ -157,14 +165,6 @@ public class Learner {
             vtrain = vhead;
         }
     }
-
-    // Count of player symbol
-//	private int singleAttribute(char[] boardState, char playerSymbol) {
-//        int count = 0;
-//        for (char symbol: boardState)
-//            count += symbol == playerSymbol? 1 : 0;
-//        return count;
-//    }
 
     // One symbol and two open in a line
     private int singleAttribute(char[] boardState, char playerSymbol) {
@@ -231,33 +231,6 @@ public class Learner {
 
         return count;
     }
-
-    // Two symbols in a line
-//    private int doubleAttribute(char[] boardState, char playerSymbol){
-//        int count = 0;
-//        // Check columns
-//        for (int i = 0; i < 3; i++) {
-//            if (boardState[0+i] == playerSymbol && boardState[3+i] == playerSymbol) count++;
-//            if (boardState[0+i] == playerSymbol && boardState[6+i] == playerSymbol) count++;
-//            if (boardState[3+i] == playerSymbol && boardState[6+i] == playerSymbol) count++;
-//        }
-//        // Check rows
-//        for (int i=0; i < 7; i = i + 3) {
-//            if (boardState[i] == playerSymbol && boardState[i+1] == playerSymbol) count++;
-//            if (boardState[i] == playerSymbol && boardState[i+2] == playerSymbol) count++;
-//            if (boardState[i+1] == playerSymbol && boardState[i+2] == playerSymbol) count++;
-//        }
-//        // Left diagonal
-//        if (boardState[0] == playerSymbol && boardState[4] == playerSymbol) count++;
-//        if (boardState[0] == playerSymbol && boardState[8] == playerSymbol) count++;
-//        if (boardState[4] == playerSymbol && boardState[8] == playerSymbol) count++;
-//        // Right diagonal
-//        if (boardState[2] == playerSymbol && boardState[4] == playerSymbol) count++;
-//        if (boardState[2] == playerSymbol && boardState[6] == playerSymbol) count++;
-//        if (boardState[4] == playerSymbol && boardState[6] == playerSymbol) count++;
-//
-//        return count;
-//    }
 
     // Three symbols in a line
     private int tripleAttribute(char[] boardState, char playerSymbol) {
@@ -326,6 +299,7 @@ public class Learner {
         return (int) (Math.random() * 2 + 1);
     }
 
+    // Choose a random move
     private int randomMove(char[] boardState) {
         int randomPosition;
         boolean validMove = false;
@@ -363,21 +337,5 @@ public class Learner {
             System.out.print("w" + i + ": " + weights[i] + " ");
         }
         System.out.println();
-    }
-
-    public static void main(String[] args) throws IOException {
-        Learner l = new Learner();
-        l.initializeWeights();
-//        l.teacherMode();
-//        l.noTeacherMode();
-//        Game game = new Game();
-//        String[] s = "X12345678 X123O5678 X123O567X X12OO567X X12OOX67X X1OOOX67X X1OOOXX7X X1OOOXXOX XXOOOXXOX".split(" ");
-//        List<char[]> g = new ArrayList<>();
-//        for (String b: s)
-//            g.add(b.toCharArray());
-//        for (char[] b: g) {
-//            game.displayBoard(b);
-//            System.out.println(Arrays.toString(l.evaluateAttributes(b,'X')));
-//        }
     }
 }

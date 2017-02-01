@@ -14,6 +14,7 @@ public class Game {
         player2 = new Player('O');
     }
 
+    // Select mode to train the computer player
     private void selectMode() throws IOException {
         boolean validSelection = false;
         Scanner in = new Scanner(System.in);
@@ -32,10 +33,12 @@ public class Game {
         }
     }
 
+    // Decide random first move
     public int initialTurn() {
         return (int) (Math.random() * 2 + 1);
     }
 
+    // Display the board
     public void displayBoard(char[] boardState) {
         System.out.println();
         System.out.println(" " + boardState[0] + " | " + boardState[1] + " | " + boardState[2]);
@@ -85,6 +88,7 @@ public class Game {
         return flag;
     }
 
+    // Function to play the game
     public void playGame() {
         int position;
         int humanWins = 0;
@@ -109,8 +113,8 @@ public class Game {
                     if (checkVictory(boardState, player1)) {
                         gameOver = true;
                         computerWins++;
-                        displayBoard(boardState);
                         System.out.println(player1.getSymbol() + " wins.");
+                        displayBoard(boardState);
                     }
                 } else {
                     //Human plays
@@ -125,8 +129,8 @@ public class Game {
                             if (checkVictory(boardState, player2)) {
                                 gameOver = true;
                                 humanWins++;
-                                displayBoard(boardState);
                                 System.out.println(player2.getSymbol() + " wins.");
+                                displayBoard(boardState);
                             }
                         } else {
                             System.out.println("Invalid move. That position already has a symbol. Try again.");
@@ -153,6 +157,7 @@ public class Game {
         displayStats(computerWins, humanWins, draws);
     }
 
+    // Function to display statistics of the games played
     private void displayStats(int computerWins, int humanWins, int draws) {
         int totalGames = computerWins + humanWins + draws;
         System.out.println("Games played: " + totalGames);

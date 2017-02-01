@@ -10,10 +10,12 @@ public class ComputerPlayer extends Player {
         super(symbol);
     }
 
+    // Train the computer player
     public void initialize(int mode) throws IOException {
         weights = experience.train(mode);
     }
 
+    // Calculate the quality of a board
     private double vhead(char[] boardState) {
         double vhead = 0;
         int[] attributes = experience.learner.evaluateAttributes(boardState, symbol);
@@ -23,6 +25,8 @@ public class ComputerPlayer extends Player {
         return vhead;
     }
 
+    // Generate next possible board states and calculate quality of each board state
+    // Return the best position
     public int selectBestMove(char[] boardState) {
         int position = -1;
         double maxScore = Double.NEGATIVE_INFINITY;
