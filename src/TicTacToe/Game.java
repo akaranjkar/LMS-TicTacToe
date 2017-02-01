@@ -22,6 +22,7 @@ public class Game {
         System.out.println("1. Teacher mode.");
         System.out.println("2. No teacher mode.");
         while (!validSelection) {
+            System.out.print("Enter your choice: ");
             int choice = Integer.parseInt(in.nextLine());
             if (choice == 1 || choice == 2) {
                 validSelection = true;
@@ -119,7 +120,7 @@ public class Game {
                 } else {
                     //Human plays
                     displayBoard(boardState);
-                    System.out.println(player2.getSymbol() + "'s turn: ");
+                    System.out.print(player2.getSymbol() + "'s turn: ");
                     position = Integer.parseInt(in.nextLine());
                     if (position >= 0 && position <= 8) {
                         if (makeMove(boardState, player2, position)) {
@@ -147,7 +148,7 @@ public class Game {
                 draws++;
             }
             // Check for another game
-            System.out.println("Do you want to play another game? (Y/N): ");
+            System.out.print("Do you want to play another game? (Y/N): ");
             String gameChoice = in.nextLine();
             if (!(gameChoice.equalsIgnoreCase("yes") || gameChoice.equalsIgnoreCase("y"))) {
                 playAgain = false;
@@ -160,10 +161,11 @@ public class Game {
     // Function to display statistics of the games played
     private void displayStats(int computerWins, int humanWins, int draws) {
         int totalGames = computerWins + humanWins + draws;
+        System.out.println("\nStatistics:");
         System.out.println("Games played: " + totalGames);
         System.out.println("Computer wins: " + computerWins);
         System.out.println("Human wins: " + humanWins);
-        System.out.println("Draws: " + draws);
+        System.out.println("Draws: " + draws + "\n");
     }
 
     // Main function. Create game, select training mode and start

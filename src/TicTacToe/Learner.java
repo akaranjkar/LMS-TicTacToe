@@ -333,8 +333,9 @@ public class Learner {
 
     // Print weight values
     private void displayWeights() {
+        System.out.println("\nWeights after training:");
         for (int i = 0; i < numberOfFeatures + 1; i++) {
-            System.out.print("w" + i + ": " + weights[i] + " ");
+            System.out.println("w" + i + ": " + weights[i]);
         }
         System.out.println();
     }
