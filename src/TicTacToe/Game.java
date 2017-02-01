@@ -22,7 +22,7 @@ public class Game {
         System.out.println("1. Teacher mode.");
         System.out.println("2. No teacher mode.");
         while (!validSelection) {
-            int choice = in.nextInt();
+            int choice = Integer.parseInt(in.nextLine());
             if (choice == 1 || choice == 2) {
                 validSelection = true;
                 // Train and start
@@ -166,6 +166,7 @@ public class Game {
         System.out.println("Draws: " + draws);
     }
 
+    // Main function. Create game, select training mode and start
     public static void main(String[] args) throws IOException {
         Game game = new Game();
         game.selectMode();
