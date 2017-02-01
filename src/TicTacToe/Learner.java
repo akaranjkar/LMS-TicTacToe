@@ -150,19 +150,19 @@ public class Learner {
 
     // LMS function
     private void lms(List<char[]> playerBoardStates, double vfinal) {
-        double vhead = 0;
+        double vhat = 0;
         double vtrain = vfinal;
         for (int i = playerBoardStates.size() - 1; i >= 0; i--) {
             char[] boardState = playerBoardStates.get(i);
             int[] attributes = evaluateAttributes(boardState, 'X');
-            // Calculate vhead
+            // Calculate vhat
             for (int j = 0; j <= numberOfFeatures; j++)
-                vhead += weights[j] * attributes[j];
+                vhat += weights[j] * attributes[j];
             // LMS update
             for (int j = 0; j <= numberOfFeatures; j++) {
-                weights[j] += learningRate * (vtrain - vhead) * attributes[j];
+                weights[j] += learningRate * (vtrain - vhat) * attributes[j];
             }
-            vtrain = vhead;
+            vtrain = vhat;
         }
     }
 

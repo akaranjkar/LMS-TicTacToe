@@ -16,13 +16,13 @@ public class ComputerPlayer extends Player {
     }
 
     // Calculate the quality of a board
-    private double vhead(char[] boardState) {
-        double vhead = 0;
+    private double vhat(char[] boardState) {
+        double vhat = 0;
         int[] attributes = experience.learner.evaluateAttributes(boardState, symbol);
         for (int i = 0; i < experience.learner.numberOfFeatures; i++) {
-            vhead += weights[i] * attributes[i];
+            vhat += weights[i] * attributes[i];
         }
-        return vhead;
+        return vhat;
     }
 
     // Generate next possible board states and calculate quality of each board state
@@ -35,7 +35,7 @@ public class ComputerPlayer extends Player {
             if (experience.learner.openPosition(boardState[i])) {
                 char[] tempBoardState = boardState.clone();
                 tempBoardState[i] = symbol;
-                double tempBoardValue = vhead(tempBoardState);
+                double tempBoardValue = vhat(tempBoardState);
                 if (tempBoardValue >= maxScore) {
                     maxScore = tempBoardValue;
                     position = i;
